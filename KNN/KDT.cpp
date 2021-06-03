@@ -127,10 +127,10 @@ signed main() {
         return sqrt(pow(x.val[0] - y.val[0], 2) + pow(x.val[1] - y.val[1], 2) + pow(x.val[2] - y.val[2], 2) + pow(x.val[3] - y.val[3], 2));
     };
     const auto ChebyshevMetric = [](Node x, Node y)->double {
-        return max(max(fabs(x.val[0] - y.val[0]), fabs(x.val[1] - y.val[2])), max(fabs(x.val[2] - y.val[2]), fabs(x.val[3] - y.val[3])));
+        return max(max(fabs(x.val[0] - y.val[0]), fabs(x.val[1] - y.val[1])), max(fabs(x.val[2] - y.val[2]), fabs(x.val[3] - y.val[3])));
     };
     const auto ManhattanMetric = [](Node x, Node y)->double {
-        return fabs(x.val[0] - y.val[0]) + fabs(x.val[1] - y.val[2]) + fabs(x.val[2] - y.val[2]) + fabs(x.val[3] - y.val[3]);
+        return fabs(x.val[0] - y.val[0]) + fabs(x.val[1] - y.val[1]) + fabs(x.val[2] - y.val[2]) + fabs(x.val[3] - y.val[3]);
     };
     const auto calcDistance = [&](int idx, Node x, Node y)->double {
         if (idx == 0) return EuclidMetric(x, y);
