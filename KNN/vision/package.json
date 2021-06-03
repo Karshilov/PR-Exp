@@ -1,0 +1,16 @@
+{
+  "name": "vision",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel index.html --port 1551",
+    "build": "parcel build index.html"
+  },
+  "keywords": [],
+  "author": "Karshilov",
+  "license": "ISC",
+  "devDependencies": {
+    "parcel": "*"
+  }
+}
