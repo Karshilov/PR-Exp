@@ -2,7 +2,7 @@
   "name": "vision",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.html",
   "scripts": {
     "start": "parcel index.html --port 1551",
     "build": "parcel build index.html"
