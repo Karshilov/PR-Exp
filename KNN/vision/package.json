@@ -9,7 +9,7 @@
   },
   "keywords": [],
   "author": "Karshilov",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "parcel": "*"
   }
