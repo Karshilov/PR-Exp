@@ -1,5 +1,5 @@
 # PR-Exp
-Pattern Recognition Experiments - 2021 Spring Term
+Pattern Recognition Experiments - 2021 Spring Term - SEU@CN - Artificial Intelligence Academy
 
 ### KNN
 
