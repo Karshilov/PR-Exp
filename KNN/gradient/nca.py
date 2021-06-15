@@ -1,4 +1,5 @@
 import numpy as np
+import json
 
 class NCA():
     def __init__(self, var_dims, learning_rate = 0.01, max_steps = 100, init_style = "normal", init_stddev = 0.1):
@@ -16,7 +17,10 @@ class NCA():
 
         s = 0
         target = 0
+        res = []
         while s < self.max_steps:
+            if s >= 1:
+                res.append(target)
             if s % 2 == 0 and s > 1:
                 print("Step {}, target = {}...".format(s, target))
             low_X = np.dot(X, self.A)
@@ -47,6 +51,10 @@ class NCA():
             gradients = 2 * np.dot(gradients, self.A)
             self.A += self.learning_rate * gradients
             s += 1
+        result = json.dumps({ 'result': res })
+        f = open('fA_' + str(self.learning_rate), 'w+')
+        f.write(result)
+        f.close()
 
     def transform(self, X):
         low_X = np.dot(X, self.A)
