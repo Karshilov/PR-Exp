@@ -52,7 +52,7 @@ class NCA():
             self.A += self.learning_rate * gradients
             s += 1
         result = json.dumps({ 'result': res })
-        f = open('fA_' + str(self.learning_rate), 'w+')
+        f = open('fA_' + str(self.learning_rate) + '.json', 'w+')
         f.write(result)
         f.close()
 

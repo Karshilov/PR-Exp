@@ -1,6 +1,11 @@
 "use strict";
 exports.__esModule = true;
 var data_1 = require("./data");
+var fA_e3 = require("./fA_0.001.json")["result"]
+var fA_e2 = require("./fA_0.01.json")["result"]
+var fA_e1 = require("./fA_0.1.json")["result"]
+var fA_e0 = require("./fA_1.json")["result"]
+console.log(fA_e3)
 var chooseDimension = function (nodes) {
     var sum = [0, 0, 0, 0];
     var cube = [0, 0, 0, 0];
