@@ -234,6 +234,46 @@ function main() {
         ]
     };
     chart.setOption(option);
+    var fdiv = document.getElementById('fA');
+    fdiv.innerHTML = "";
+    fdiv.style.width = '1200px';
+    fdiv.style.height = '720px';
+    var sizeValue = '57%';
+    var fchart = echarts.init(fdiv);
+    var foption = {
+        tooltip: {},
+        legend: {},
+        grid: [
+            {right: sizeValue, bottom: sizeValue},
+            {left: sizeValue, bottom: sizeValue},
+            {right: sizeValue, top: sizeValue},
+            {left: sizeValue, top: sizeValue}
+        ],
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        xAxis: [
+            {type: 'value', gridIndex: 0, name: 'times', axisLabel: {rotate: 50, interval: 0}},
+            {type: 'value', gridIndex: 1, name: 'times', axisLabel: {rotate: 50, interval: 0}},
+            {type: 'value', gridIndex: 2, name: 'times', axisLabel: {rotate: 50, interval: 0}},
+            {type: 'value', gridIndex: 3, name: 'times', axisLabel: {rotate: 50, interval: 0}}
+        ],
+        yAxis: [
+            {type: 'value', gridIndex: 0, name: 'f(A) - 0.001', scale: true,},
+            {type: 'value', gridIndex: 1, name: 'f(A) - 0.01', scale: true,},
+            {type: 'value', gridIndex: 2, name: 'f(A) - 0.1', scale: true,},
+            {type: 'value', gridIndex: 3, name: 'f(A) - 1', scale: true,}
+        ],
+        series: [
+            { name: 'f(A) - 0.001', type: 'line', smooth: true, data: fA_e3.map((item, index) => [index + 1, item]), xAxisIndex: 0, yAxisIndex: 0, },
+            { name: 'f(A) - 0.01', type: 'line', smooth: true, data: fA_e2.map((item, index) => [index + 1, item]), xAxisIndex: 1, yAxisIndex: 1, },
+            { name: 'f(A) - 0.1', type: 'line', smooth: true, data: fA_e1.map((item, index) => [index + 1, item]), xAxisIndex: 2, yAxisIndex: 2, },
+            { name: 'f(A) - 1', type: 'line', smooth: true, data: fA_e0.map((item, index) => [index + 1, item]), xAxisIndex: 3, yAxisIndex: 3, },
+        ]
+    };
+    fchart.setOption(foption);
 }
 main();
 //g++ -lstdc++ KDT.cpp Read.cpp -o KDT --std=c++14
