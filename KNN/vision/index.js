@@ -1,11 +1,17 @@
 "use strict";
 exports.__esModule = true;
+
 var data_1 = require("./data");
 var fA_e3 = require("./fA_0.001.json")["result"]
 var fA_e2 = require("./fA_0.01.json")["result"]
 var fA_e1 = require("./fA_0.1.json")["result"]
 var fA_e0 = require("./fA_1.json")["result"]
-console.log(fA_e3)
+
+const mA = [[-1.51077495, 16.3890638],
+[0.83267187, -9.99911767],
+[1.01721511, -10.07326659],
+[-0.69879945, 7.58202371]];
+
 var chooseDimension = function (nodes) {
     var sum = [0, 0, 0, 0];
     var cube = [0, 0, 0, 0];
@@ -64,6 +70,17 @@ var ChebyshevMetric = function (x, y) {
 var ManhattanMetric = function (x, y) {
     return Math.abs(x.val[0] - y.val[0]) + Math.abs(x.val[1] - y.val[1]) + Math.abs(x.val[2] - y.val[2]) + Math.abs(x.val[3] - y.val[3]);
 };
+var NCAMetric = function (x, y) {
+    var dis = []
+    for (let i = 0; i < 4; i++) dis.push(x.val[0] - y.val[0]);
+    var hlf = [0, 0]
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 2; j++) {
+            hlf[j] += dis[i] * mA[i][j];
+        }
+    }
+    return Math.sqrt(hlf[0] * hlf[0] + hlf[1] * hlf[1]);
+}
 var calcDistance = function (idx, x, y) {
     if (idx == 0)
         return EuclidMetric(x, y);
@@ -71,6 +88,8 @@ var calcDistance = function (idx, x, y) {
         return ChebyshevMetric(x, y);
     if (idx == 2)
         return ManhattanMetric(x, y);
+    if (idx == 3)
+        return NCAMetric(x, y);
     return 0;
 };
 var calculateResult = function (K, metric, valid, rt) {
@@ -168,12 +187,14 @@ function main() {
     var eulerData = [];
     var chebData = [];
     var manData = [];
+    var NCAData = [];
     var kData = [];
     for (var i = 1; i < 60; i += 2) {
         kData.push(i);
         eulerData.push(calculateResult(i, 0, normedValid, root));
         chebData.push(calculateResult(i, 1, normedValid, root));
         manData.push(calculateResult(i, 2, normedValid, root));
+        NCAData.push(calculateResult(i, 3, normedValid, root));
     }
     var rdiv = document.getElementById('root');
     rdiv.innerHTML = "";
@@ -182,13 +203,13 @@ function main() {
     var chart = echarts.init(rdiv);
     var option = {
         title: {
-            text: 'KNN - 常规距离度量实验'
+            text: 'KNN - 距离度量实验'
         },
         tooltip: {
             trigger: 'axis'
         },
         legend: {
-            data: ['欧式距离', '切比雪夫距离', '曼哈顿距离'],
+            data: ['欧式距离', '切比雪夫距离', '曼哈顿距离', '马氏距离'],
             top: '25px'
         },
         grid: {
@@ -231,9 +252,14 @@ function main() {
                 smooth: true,
                 data: manData
             },
+            {
+                name: '马氏距离',
+                type: 'line',
+                smooth: true,
+                data: NCAData
+            },
         ]
     };
     chart.setOption(option);
 }
 main();
-//g++ -lstdc++ KDT.cpp Read.cpp -o KDT --std=c++14
