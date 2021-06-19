@@ -9,11 +9,29 @@ class NCA():
         self.init_style = init_style
         self.init_stddev = init_stddev
 
+    def transform(self, X):
+        halfM = np.dot(X, self.A)
+        return halfM
+
+    def fit_transform(self, X, Y):
+        self.fit(X, Y)
+        halfM = self.transform(X)
+        return halfM
+
+    def init_matrix(self, shape):
+        if self.init_style == "normal":
+            return self.init_stddev * np.random.standard_normal(size = shape)
+        elif self.init_style == "uniform":
+            return np.random.uniform(size = shape)
+        else:
+            print("error style!")
+            raise Exception
+
     def fit(self, X, Y):
         (n, d) = X.shape
         self.n_samples = n
         self.param_dims = d
-        self.A = self.get_random_params(shape = (self.param_dims, self.var_dims))
+        self.A = self.init_matrix(shape = (self.param_dims, self.var_dims))
 
         s = 0
         target = 0
@@ -21,11 +39,9 @@ class NCA():
         while s < self.max_steps:
             if s >= 1:
                 res.append(target)
-            if s % 2 == 0 and s > 1:
-                print("Step {}, target = {}...".format(s, target))
-            low_X = np.dot(X, self.A)
-            sum_row = np.sum(low_X ** 2, axis = 1)
-            xxt = np.dot(low_X, low_X.transpose())
+            halfM = np.dot(X, self.A)
+            sum_row = np.sum(halfM ** 2, axis = 1)
+            xxt = np.dot(halfM, halfM.transpose())
             #broadcast
             dist_mat = sum_row + np.reshape(sum_row, (-1, 1)) - 2 * xxt
 
@@ -55,22 +71,3 @@ class NCA():
         f = open('fA_' + str(self.learning_rate) + '.json', 'w+')
         f.write(result)
         f.close()
-
-    def transform(self, X):
-        low_X = np.dot(X, self.A)
-        return low_X
-
-
-    def fit_transform(self, X, Y):
-        self.fit(X, Y)
-        low_X = self.transform(X)
-        return low_X
-
-    def get_random_params(self, shape):
-        if self.init_style == "normal":
-            return self.init_stddev * np.random.standard_normal(size = shape)
-        elif self.init_style == "uniform":
-            return np.random.uniform(size = shape)
-        else:
-            print("No such parameter init style!")
-            raise Exception
