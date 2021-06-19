@@ -1,13 +1,11 @@
 "use strict";
 exports.__esModule = true;
+const { writeToPath } = require('@fast-csv/format');
+const path = require('path');
 
 var data_1 = require("./data");
-var fA_e3 = require("./fA_0.001.json")["result"]
-var fA_e2 = require("./fA_0.01.json")["result"]
-var fA_e1 = require("./fA_0.1.json")["result"]
-var fA_e0 = require("./fA_1.json")["result"]
 
-const mA = [[[-9.51319315, -3.70999657],
+var mA = [[[-9.51319315, -3.70999657],
     [ 5.34647591,  1.94004661],
     [ 5.40323919,  2.2097934 ],
     [-4.09802851, -1.5853339 ]], 
@@ -129,7 +127,7 @@ var calcDistance = function (idx, x, y) {
         return NCAMetric(x, y);
     return 0;
 };
-var calculateResult = function (K, metric, valid, rt) {
+var calculateResult = function (K, metric, test, rt) {
     var nearest = [];
     var KNNSearch = function (trg, metricIndex, root) {
         if (root === null || root.d == -1)
@@ -155,8 +153,8 @@ var calculateResult = function (K, metric, valid, rt) {
                 KNNSearch(trg, metricIndex, root.l);
         }
     };
-    var cnt = 0;
-    valid.forEach(function (dot) {
+    var resArray = [];
+    test.forEach(function (dot) {
         nearest.length = 0;
         KNNSearch(dot, metric, rt);
         var cnt1 = 0;
@@ -164,10 +162,9 @@ var calculateResult = function (K, metric, valid, rt) {
             if (x.node.fg)
                 cnt1++;
         });
-        if ((cnt1 > K - cnt1) === dot.fg)
-            cnt++;
+        resArray.push((cnt1 > K - cnt1))
     });
-    return cnt / valid.length;
+    return resArray.map(item => [item ? 1 : 0]);
 };
 function main() {
     var trainNodes = [];
@@ -186,20 +183,20 @@ function main() {
         norm[2] = Math.max(norm[1], data_1.train[i + 2]);
         norm[3] = Math.max(norm[1], data_1.train[i + 3]);
     }
-    var validNodes = [];
-    for (var i = 0; i < data_1.valid.length; i += 5) {
-        validNodes.push({
-            val: [data_1.valid[i], data_1.valid[i + 1], data_1.valid[i + 2], data_1.valid[i + 3]],
-            fg: (!!data_1.valid[i + 4]),
+    var testNodes = [];
+    for (var i = 0; i < data_1.test.length; i += 4) {
+        testNodes.push({
+            val: [data_1.test[i], data_1.test[i + 1], data_1.test[i + 2], data_1.test[i + 3]],
+            fg: 0,
             d: -1,
             divider: -1,
             l: null,
             r: null
         });
-        norm[0] = Math.max(norm[0], data_1.valid[i]);
-        norm[1] = Math.max(norm[1], data_1.valid[i + 1]);
-        norm[2] = Math.max(norm[1], data_1.valid[i + 2]);
-        norm[3] = Math.max(norm[1], data_1.valid[i + 3]);
+        norm[0] = Math.max(norm[0], data_1.test[i]);
+        norm[1] = Math.max(norm[1], data_1.test[i + 1]);
+        norm[2] = Math.max(norm[1], data_1.test[i + 2]);
+        norm[3] = Math.max(norm[1], data_1.test[i + 3]);
     }
     var root = balanceKDT(trainNodes.map(function (e) {
         return {
@@ -211,7 +208,7 @@ function main() {
             r: e.r
         };
     }));
-    var normedValid = validNodes.map(function (e) {
+    var normedtest = testNodes.map(function (e) {
         return {
             val: [e.val[0] / norm[0] * 100, e.val[1] / norm[1] * 100, e.val[2] / norm[2] * 100, e.val[3] / norm[3] * 100],
             fg: e.fg,
@@ -221,153 +218,14 @@ function main() {
             r: e.r
         };
     });
-    var eulerData = [];
-    var chebData = [];
-    var manData = [];
-    var NCAData = [];
-    var kData = [];
-    var k1AiData = [];
-    var iData = [];
-    for (var i = 0, cur = -1, pos = -1; i < 10; i++) {
-        iData.push(0.1 * (i + 1));
-        _global_A = i;
-        const ret = calculateResult(1, 3, normedValid, root);
-        if (ret > cur) {
-            cur = ret, pos = i;
-        }
-        k1AiData.push(ret);
-        if (i === 9) {
-            _global_A = pos;
-        }
-    }
-    for (var i = 1; i < 60; i += 2) {
-        kData.push(i);
-        eulerData.push(calculateResult(i, 0, normedValid, root));
-        chebData.push(calculateResult(i, 1, normedValid, root));
-        manData.push(calculateResult(i, 2, normedValid, root));
-        NCAData.push(calculateResult(i, 3, normedValid, root));
-    }
-    var ldiv = document.getElementById('lr');
-    ldiv.innerHTML = "";
-    ldiv.style.width = '800px';
-    ldiv.style.height = '640px';
-    var lchart = echarts.init(ldiv);
-    var loption = {
-        title: {
-            text: 'KNN - 不同学习率下的1NN分类'
-        },
-        tooltip: {},
-        legend: {},
-        grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            containLabel: true
-        },
-        toolbox: {
-            feature: {
-                saveAsImage: {}
-            }
-        },
-        xAxis: {
-            name: 'learning rate',
-            type: 'category',
-            data: iData.map(function (e) { return e.toString(); })
-        },
-        yAxis: {
-            name: 'Acc',
-            type: 'value',
-            scale: true,
-        },
-        series: [
-            { name: '学习率', type: 'line', smooth: false, data: k1AiData },
-        ]
-    };
-    lchart.setOption(loption);
-    var rdiv = document.getElementById('root');
-    rdiv.innerHTML = "";
-    rdiv.style.width = '800px';
-    rdiv.style.height = '640px';
-    var chart = echarts.init(rdiv);
-    var option = {
-        title: {
-            text: 'KNN - 距离度量实验'
-        },
-        tooltip: {
-            trigger: 'axis'
-        },
-        legend: {
-            data: ['欧式距离', '切比雪夫距离', '曼哈顿距离', '马氏距离'],
-            top: '25px'
-        },
-        grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            containLabel: true
-        },
-        toolbox: {
-            feature: {
-                saveAsImage: {}
-            }
-        },
-        xAxis: {
-            name: 'K',
-            type: 'category',
-            data: kData.map(function (e) { return e.toString(); })
-        },
-        yAxis: {
-            name: 'Acc',
-            type: 'value',
-            scale: true,
-        },
-        series: [
-            { name: '欧式距离', type: 'line', smooth: true, data: eulerData },
-            { name: '切比雪夫距离', type: 'line', smooth: true, data: chebData },
-            { name: '曼哈顿距离', type: 'line', smooth: true, data: manData },
-            { name: '马氏距离', type: 'line', smooth: true, data: NCAData },
-        ]
-    };
-    chart.setOption(option);
-    var fdiv = document.getElementById('fA');
-    fdiv.innerHTML = "";
-    fdiv.style.width = '1200px';
-    fdiv.style.height = '720px';
-    var sizeValue = '57%';
-    var fchart = echarts.init(fdiv);
-    var foption = {
-        tooltip: {},
-        legend: {},
-        grid: [
-            {right: sizeValue, bottom: sizeValue},
-            {left: sizeValue, bottom: sizeValue},
-            {right: sizeValue, top: sizeValue},
-            {left: sizeValue, top: sizeValue}
-        ],
-        toolbox: {
-            feature: {
-                saveAsImage: {}
-            }
-        },
-        xAxis: [
-            {type: 'value', gridIndex: 0, name: 'times', axisLabel: {rotate: 50, interval: 0}},
-            {type: 'value', gridIndex: 1, name: 'times', axisLabel: {rotate: 50, interval: 0}},
-            {type: 'value', gridIndex: 2, name: 'times', axisLabel: {rotate: 50, interval: 0}},
-            {type: 'value', gridIndex: 3, name: 'times', axisLabel: {rotate: 50, interval: 0}}
-        ],
-        yAxis: [
-            {type: 'value', gridIndex: 0, name: 'f(A) - 0.001', scale: true,},
-            {type: 'value', gridIndex: 1, name: 'f(A) - 0.01', scale: true,},
-            {type: 'value', gridIndex: 2, name: 'f(A) - 0.1', scale: true,},
-            {type: 'value', gridIndex: 3, name: 'f(A) - 1', scale: true,}
-        ],
-        series: [
-            { name: 'f(A) - 0.001', type: 'line', smooth: true, data: fA_e3.map((item, index) => [index + 1, item]), xAxisIndex: 0, yAxisIndex: 0, },
-            { name: 'f(A) - 0.01', type: 'line', smooth: true, data: fA_e2.map((item, index) => [index + 1, item]), xAxisIndex: 1, yAxisIndex: 1, },
-            { name: 'f(A) - 0.1', type: 'line', smooth: true, data: fA_e1.map((item, index) => [index + 1, item]), xAxisIndex: 2, yAxisIndex: 2, },
-            { name: 'f(A) - 1', type: 'line', smooth: true, data: fA_e0.map((item, index) => [index + 1, item]), xAxisIndex: 3, yAxisIndex: 3, },
-        ]
-    };
-    fchart.setOption(foption);
+    const euc = calculateResult(1, 1, normedtest, root);
+    _global_A = 5;
+    const mt = calculateResult(1, 3, normedtest, root);
+    writeToPath(path.resolve(__dirname, 'euc.csv'), euc)
+    .on('error', err => console.error(err))
+    .on('finish', () => console.log('Done writing.'));
+    writeToPath(path.resolve(__dirname, 'mt.csv'), mt)
+    .on('error', err => console.error(err))
+    .on('finish', () => console.log('Done writing.'));
 }
 main();
