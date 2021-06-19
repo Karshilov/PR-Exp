@@ -1,7 +1,5 @@
 # 实验一 KNN分类
 
-58119216 刘幽远
-
 ## 问题概述
 
 + 利用KNN算法对输血服务中心数据集中的测试集进行分类。![image-20210619231028740](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20210619231028740.png)
