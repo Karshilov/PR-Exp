@@ -47,19 +47,25 @@ a, b = get_params(w3)
 x_prob3 = calc_prob(final_test[:, 1:], a, b) * super_p3
 
 cnt = 0
+res = final_test
 for i in range(len(x_prob3)):
     if x_prob1[i] == max(x_prob1[i], x_prob2[i], x_prob3[i]):
+        res[i][0] = 1
         if final_test[i][0] == 1:
             cnt = cnt + 1
             continue
     if x_prob2[i] == max(x_prob1[i], x_prob2[i], x_prob3[i]):
+        res[i][0] = 2
         if final_test[i][0] == 2:
             cnt = cnt + 1
             continue
     if x_prob3[i] == max(x_prob1[i], x_prob2[i], x_prob3[i]):
+        res[i][0] = 3
         if final_test[i][0] == 3:
             cnt = cnt + 1
             continue
 
-print (cnt / len(final_test))
+res = pd.DataFrame(res)
+res.to_csv('test_prediction.csv', index=False, sep=',', header=None)
+print ('prediction acc: ', cnt / len(final_test))
 
