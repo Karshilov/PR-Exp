@@ -218,10 +218,18 @@ function main() {
             r: e.r
         };
     });
-    const euc = calculateResult(1, 1, normedtest, root);
+    const euc = calculateResult(1, 0, normedtest, root);
+    const cheb = calculateResult(1, 2, normedtest, root);
+    const manh = calculateResult(1, 1, normedtest, root);
     _global_A = 5;
     const mt = calculateResult(1, 3, normedtest, root);
     writeToPath(path.resolve(__dirname, 'euc.csv'), euc)
+    .on('error', err => console.error(err))
+    .on('finish', () => console.log('Done writing.'));
+    writeToPath(path.resolve(__dirname, 'cheb.csv'), cheb)
+    .on('error', err => console.error(err))
+    .on('finish', () => console.log('Done writing.'));
+    writeToPath(path.resolve(__dirname, 'manh.csv'), manh)
     .on('error', err => console.error(err))
     .on('finish', () => console.log('Done writing.'));
     writeToPath(path.resolve(__dirname, 'mt.csv'), mt)
